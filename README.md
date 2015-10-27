@@ -18,4 +18,4 @@ If it matches, the command is processed by replacing `$0`, `$1`, `$2` and so on 
 $1 refers to the command name itself, $2 the first argument, and so on.  This allows rather complex commands like `service $1 status | head -n 3 | tail -n 1 | grep $2` where you could do something like `status cron dead` and only those servers where cron was dead would respond(note, this example is for a system running systemd, tune to match your service manager)
 
 # Logging
-Will be added soon
+Logs operate in 2 ways, Live, and Held.  Live logs output directly to specific channels as new log lines come in, and Held logs store the last X lines, and output them on demand.  A log can be both Live and Held at the same time, if desired.  Logs can be filtered by regex using golang's regexp library [Syntax](https://github.com/google/re2/wiki/Syntax).
