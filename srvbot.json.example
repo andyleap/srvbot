@@ -1,0 +1,10 @@
+{
+	"Nick": "srvbot",
+	"Server": "irc.freenode.net",
+	"Channels": ["#srvbot"],
+	"Commands": [
+		{"Name": "restart",
+		"Command": "shutdown -r now",
+		"Output": false}
+	]
+}
