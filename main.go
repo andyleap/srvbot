@@ -22,7 +22,7 @@ type ConfigData struct {
 	Channels []string
 	Groups   []string
 	Admins   []string
-	Commands []*Command
+	Commands map[string]*Command
 	Logs []*Log
 }
 
@@ -78,24 +78,26 @@ func Connect(c *irc.Conn, l *irc.Line) {
 func Message(c *irc.Conn, l *irc.Line) {
 	if c.StateTracker().GetNick(l.Nick).Channels[l.Target()].Op {
 		data := ParseLine(l.Text())
-		fmt.Printf("%q", data)
-		var cmd *Command
-		for _, curcmd := range Config.Commands {
-			if curcmd.Name == data[0] {
-				cmd = curcmd
+		forMe := false
+		if data[0] == Config.Nick {
+			forMe = true
+		}
+		for _, group := range Config.Groups {
+			if group == data[0] {
+				forMe = true
 				break
 			}
 		}
-		if cmd != nil {
+		if !forMe {
+			return
+		}
+		if cmd, ok := Config.Commands[data[1]]; ok {
 			args := cmd.Command
 			for pos, param := range data {
 				args = strings.Replace(args, fmt.Sprintf("$%d", pos), param, -1)
 			}
 			cmdexec := exec.Command("bash", "-c", args)
-			output, err := cmdexec.CombinedOutput()
-			if err != nil {
-				c.Privmsgf(l.Target(), "Command error: %s", err)
-			}
+			output, _ := cmdexec.CombinedOutput()
 			if cmd.Output {
 				lines := strings.Split(string(output), "\n")
 				for _, line := range lines {

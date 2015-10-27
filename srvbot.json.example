@@ -2,6 +2,7 @@
 	"Nick": "srvbot",
 	"Server": "irc.freenode.net",
 	"Channels": ["#srvbot"],
+	"Groups": ["all"],
 	"Commands": [
 		{"Name": "restart",
 		"Command": "shutdown -r now",
