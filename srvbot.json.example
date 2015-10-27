@@ -3,9 +3,16 @@
 	"Server": "irc.freenode.net",
 	"Channels": ["#srvbot"],
 	"Groups": ["all"],
-	"Commands": [
-		{"Name": "restart",
-		"Command": "shutdown -r now",
-		"Output": false}
-	]
+	"Commands": {
+		"restart": {
+			"Command": "shutdown -r now",
+			"Output": false
+		}
+	},
+	"Logs": {
+		"syslog": {
+			"File": "/var/log/syslog",
+			"Keep": 10
+		}
+	}
 }
