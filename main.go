@@ -1,6 +1,8 @@
 package main
 
 import (
+	"math"
+	"strconv"
 	"time"
 	"os"
 	"regexp"
@@ -15,6 +17,7 @@ import (
 	irc "github.com/fluffle/goirc/client"
 	"github.com/fluffle/goirc/state"
 	"github.com/hpcloud/tail"
+	"github.com/joliv/spark"
 )
 
 var (
@@ -50,6 +53,7 @@ type MonitorConfig struct {
 	Driver string
 	Options *json.RawMessage
 	monitor Monitor
+	track *MonitorTrack
 }
 
 var Config ConfigData
@@ -129,6 +133,8 @@ func Connect(c *irc.Conn, l *irc.Line) {
 	}
 	for _, monitorConfig := range Config.Monitors {
 		monitorConfig.monitor = monitorDrivers[monitorConfig.Driver](monitorConfig.Options)
+		monitorConfig.track = newMonitorTrack()
+		monitorConfig.track.Start(monitorConfig.monitor)
 	}
 }
 
@@ -236,9 +242,88 @@ func Message(c *irc.Conn, l *irc.Line) {
 					values := monitor.monitor.GetValues(variables)
 					for _, variable := range variables {
 						if value, ok := values[variable]; ok {
-							c.Privmsgf(l.Target(), "%s = %s", variable, value)
+							c.Privmsgf(l.Target(), "%s = %v", variable, value)
 						}
 					}
+				case "track":
+					if len(data) < 5 {
+						if l.Public() {
+							c.Privmsg(l.Target(), "Responding in PM")
+						}
+						c.Privmsgf(l.Nick, "History tracking for %d variables", len(monitor.track.Variables))
+						for variable, vt := range monitor.track.Variables {
+							c.Privmsgf(l.Nick, "%s = %d items", variable, vt.History)
+						}
+						return
+					}
+					if len(data) < 6 {
+						if vt, ok := monitor.track.Variables[data[3]]; ok {
+							c.Privmsgf(l.Target(), "Not tracking history for variable %s of monitor %s", data[4], data[3])
+						} else {
+							c.Privmsgf(l.Target(), "History tracking for variable %s of monitor %s set to %v items", data[4], data[3], vt.History)
+						}
+						return
+					}
+					h, err := strconv.ParseInt(data[5], 10, 32)
+					if err != nil {
+						c.Privmsgf(l.Target(), "Error parsing %s: %s", data[5], err)
+						return
+					}
+					monitor.track.SetTrack(data[4], int(h))
+					c.Privmsgf(l.Target(), "History tracking for variable %s of monitor %s set to %v items", data[4], data[3], h)
+				case "interval":
+					if len(data) < 5 {
+						c.Privmsgf(l.Target(), "Interval for monitor %s set to %v", data[3], monitor.track.Interval)
+						return
+					}
+					interval, err := strconv.ParseInt(data[4], 10, 32)
+					if err != nil {
+						c.Privmsgf(l.Target(), "Error parsing %s: %s", data[4], err)
+						return
+					}
+					monitor.track.Interval = int(interval)
+					monitor.track.timer.Reset(time.Second * time.Duration(interval))
+					c.Privmsgf(l.Target(), "Interval for monitor %s set to %v", data[3], interval)
+				case "spark":
+					if len(data) < 5 {
+						c.Privmsg(l.Target(), "Please specify a variable to display")
+						return
+					}
+					vt, ok := monitor.track.Variables[data[4]]
+					if !ok {
+						c.Privmsg(l.Target(), "Not tracking that variable")
+						return
+					}
+					values := make([]float64, len(vt.Data))
+					high := -math.MaxFloat64
+					low := math.MaxFloat64
+					for i, val := range vt.Data {
+						switch tt := val.(type){
+						case float64:
+							values[i] = tt
+						case float32:
+							values[i] = float64(tt)
+						case uint32:
+							values[i] = float64(tt)
+						case uint64:
+							values[i] = float64(tt)
+						case int32:
+							values[i] = float64(tt)
+						case int64:
+							values[i] = float64(tt)
+						default:
+							c.Privmsgf(l.Target(), "Variable is of type %t, cannot spark", tt)
+						}
+						if values[i] > high {
+							high = values[i]
+						}
+						if values[i] < low {
+							low = values[i]
+						}
+					}
+					c.Privmsgf(l.Target(), "%s: %s High: %v Low: %v", data[4], spark.Line(values), high, low)
+				default:
+					c.Privmsgf(l.Target(), "Monitor command `%s` not recognized", data[3])
 				}
 				
 			}

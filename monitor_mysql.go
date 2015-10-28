@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strconv"
 	"log"
 	"strings"
 	"encoding/json"
@@ -67,9 +68,10 @@ func (m *MysqlMonitor) GetValues(names []string) (values map[string]interface{})
 	}
 	for data.Next() {
 		var name string
-		var value interface{}
+		var value string
 		data.Scan(&name, &value)
-		values[name] = value
+		intValue, _ := strconv.ParseInt(value, 10, 64)
+		values[name] = intValue
 	}
 	return
 }
