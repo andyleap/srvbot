@@ -239,7 +239,7 @@ func Message(text string, source User, channel string, response MessageTarget) {
 						return
 					}
 					if len(data) < 6 {
-						if vt, ok := monitor.track.Variables[data[3]]; ok {
+						if vt, ok := monitor.track.Variables[data[4]]; ok {
 							response.SendMessage("Not tracking history for variable %s of monitor %s", data[4], data[3])
 						} else {
 							response.SendMessage("History tracking for variable %s of monitor %s set to %v items", data[4], data[3], vt.History)
@@ -251,6 +251,7 @@ func Message(text string, source User, channel string, response MessageTarget) {
 						response.SendMessage("Error parsing %s: %s", data[5], err)
 						return
 					}
+					fmt.Println(monitor.track, data[4], h)
 					monitor.track.SetTrack(data[4], int(h))
 					response.SendMessage("History tracking for variable %s of monitor %s set to %v items", data[4], data[3], h)
 				case "interval":

@@ -36,7 +36,7 @@ type MonitorTrackVariable struct {
 func (mt *MonitorTrack) SetTrack(variable string, history int) {
 	track, ok := mt.Variables[variable]
 	if !ok && history > 0 {
-		track := &MonitorTrackVariable{}
+		track = &MonitorTrackVariable{}
 		mt.Variables[variable] = track
 	}
 	if history == 0 && ok {
