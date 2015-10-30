@@ -1,7 +1,22 @@
 {
-	"Nick": "srvbot",
-	"Server": "irc.freenode.net",
-	"Channels": ["#srvbot"],
+	"Name": "srvbot",
+	"Endpoints": [
+		{
+			"Driver": "irc",
+			"Options": {
+				"Nick": "srvbot",
+				"Server": "irc.freenode.net",
+				"Channels": ["#srvbot"]
+			}
+		},
+		{
+			"Driver": "slack",
+			"Options": {
+				"Token": "<TOKEN>",
+				"Channels": ["#general"]
+			}
+		}
+	],
 	"Groups": ["all"],
 	"Commands": {
 		"restart": {
@@ -13,6 +28,18 @@
 		"syslog": {
 			"File": "/var/log/syslog",
 			"Keep": 10
+		}
+	},
+	"Monitors": {
+		"mysql": {
+			"Driver": "mysql",
+			"Options": {
+				"Connection": "root:root@/"
+			}
+		},
+		"memory": {
+			"Driver": "memory",
+			"Options": {}
 		}
 	}
 }
