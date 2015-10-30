@@ -20,3 +20,13 @@ $1 refers to the command name itself, $2 the first argument, and so on.  This al
 
 # Logging
 Logs operate in 2 ways, Live, and Held.  Live logs output directly to specific channels as new log lines come in, and Held logs store the last X lines, and output them on demand.  A log can be both Live and Held at the same time, if desired.  Logs can be filtered by regex using golang's regexp library [Syntax](https://github.com/google/re2/wiki/Syntax).
+
+# Monitoring
+Monitors are used to query and track variables over time, this includes things like memory info, mysql query counts, http connections/second and so forth.
+
+## Current Monitors
+* mysql
+* memory
+
+# Contact
+My development srvbot and I are on freenode, channel #srvbot.  [WebChat](http://webchat.freenode.net/?channels=%23srvbot&uio=d4).  Let me know what kind of things you'd be interested in seeing srvbot do!
