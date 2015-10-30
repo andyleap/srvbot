@@ -1,12 +1,13 @@
 # srvbot
-Simple bot for control and monitoring of a server over IRC
-Run it on all your servers and be able to control all of them over IRC directly 
+Simple bot for control and monitoring of a server over IRC or Slack.
+Run it on all your servers and be able to control all of them directly.
 
 Currently in alpha, not offering pre-built binaries at this point.
 
 # Usage
-Edit srvbot.json with your desired irc server, nickname, groups, and channels.
-Add custom commands as desired.
+Edit srvbot.json with your desired endpoints, commands, logfiles, and monitors.
+
+TODO: Change over from json to something a little more human friendly
 
 # Commands
 All commands are parsed from IRC using sh/bash style quotes, i.e. `status cron` becomes `"status", "cron"` and `this "is a" test` becomes `"this", "is a", "test"`
