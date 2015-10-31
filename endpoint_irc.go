@@ -69,7 +69,6 @@ func (ei *EndpointIRC) connect(c *irc.Conn, l *irc.Line) {
 }
 
 func (ei *EndpointIRC) message(c *irc.Conn, l *irc.Line) {
-	log.Println(l.Raw)
 	var messageTarget MessageTarget
 	if l.Public() {
 		messageTarget = ei.GetChannel(l.Target())

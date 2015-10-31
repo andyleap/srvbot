@@ -159,6 +159,22 @@ func Message(text string, source User, channel string, response MessageTarget) {
 			for _, line := range log.lines {
 				response.SendMessage("%s", line.Text)
 			}
+		} else if data[1] == "get" {
+			if len(data) < 3 {
+				response.SendMessage("Please provide an expression to compute")
+				return
+			}
+			c, err := Decode(data[2])
+			if err != nil {
+				response.SendMessage("Error parsing expression: %s", err)
+				return
+			}
+			val, err := RunCompute(c)
+			if err != nil {
+				response.SendMessage("Error computing expression: %s", err)
+				return
+			}
+			response.SendMessage("%s = %v", data[2], val)
 		} else if data[1] == "monitor" {
 			if len(data) < 3 {
 				if response.IsPublic() {
