@@ -2,7 +2,7 @@ package main
 
 import (
 	"strings"
-	)
+)
 
 const (
 	stateConsume = iota
@@ -13,10 +13,10 @@ const (
 func ParseLine(line string) []string {
 	parts := []string{}
 	curpart := ""
-	state := stateConsume 
+	state := stateConsume
 	reader := strings.NewReader(line)
-	
-	for rune, _, err := reader.ReadRune();err == nil;rune, _, err = reader.ReadRune() {
+
+	for rune, _, err := reader.ReadRune(); err == nil; rune, _, err = reader.ReadRune() {
 		switch state {
 		case stateConsume:
 			if rune == '"' {

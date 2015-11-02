@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 )
 
-var endpointDrivers = make(map[string] func(*json.RawMessage) Endpoint)
+var endpointDrivers = make(map[string]func(*json.RawMessage) Endpoint)
 
 func AddEndpointDriver(endpoint string, constructor func(*json.RawMessage) Endpoint) {
 	endpointDrivers[endpoint] = constructor

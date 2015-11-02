@@ -1,22 +1,22 @@
 package main
 
 import (
-	"log"
 	"encoding/json"
+	"log"
 	"time"
-	
+
 	irc "github.com/fluffle/goirc/client"
 )
 
 func init() {
-	AddEndpointDriver("irc", func(options *json.RawMessage) Endpoint{
+	AddEndpointDriver("irc", func(options *json.RawMessage) Endpoint {
 		return newEndpointIRC(options)
 	})
 }
 
 type EndpointIRC struct {
-	Config EndpointIRCConfig
-	conn *irc.Conn
+	Config  EndpointIRCConfig
+	conn    *irc.Conn
 	handler func(text string, source User, channel string, response MessageTarget)
 }
 
@@ -27,12 +27,12 @@ type EndpointIRCConfig struct {
 }
 
 type UserIRC struct {
-	ei *EndpointIRC
+	ei   *EndpointIRC
 	nick string
 }
 
 type MessageTargetIRC struct {
-	ei   *EndpointIRC
+	ei     *EndpointIRC
 	target string
 	public bool
 }
@@ -46,9 +46,9 @@ func newEndpointIRC(options *json.RawMessage) *EndpointIRC {
 	e.conn.EnableStateTracking()
 	e.conn.HandleFunc(irc.CONNECTED, e.connect)
 	e.conn.HandleFunc(irc.PRIVMSG, e.message)
-    e.conn.HandleFunc(irc.DISCONNECTED,
-        func(conn *irc.Conn, line *irc.Line) { 
-			time.AfterFunc(time.Second*30, func(){
+	e.conn.HandleFunc(irc.DISCONNECTED,
+		func(conn *irc.Conn, line *irc.Line) {
+			time.AfterFunc(time.Second*30, func() {
 				e.conn.Connect()
 			})
 		})
@@ -80,14 +80,14 @@ func (ei *EndpointIRC) message(c *irc.Conn, l *irc.Line) {
 
 func (ei *EndpointIRC) GetUser(nick string) User {
 	return &UserIRC{
-		ei: ei,
+		ei:   ei,
 		nick: nick,
 	}
 }
 
 func (ei *EndpointIRC) GetChannel(channel string) MessageTarget {
 	return &MessageTargetIRC{
-		ei: ei,
+		ei:     ei,
 		target: channel,
 		public: true,
 	}
@@ -120,7 +120,7 @@ func (u *UserIRC) HasRights() bool {
 	}
 	return false
 }
-	
+
 func (u *UserIRC) IsPublic() bool {
 	return false
 }

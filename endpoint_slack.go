@@ -1,29 +1,29 @@
 package main
 
 import (
-	"fmt"
 	"encoding/json"
-	
+	"fmt"
+
 	irc "github.com/fluffle/goirc/client"
 	"github.com/nlopes/slack"
 )
 
 func init() {
-	AddEndpointDriver("slack", func(options *json.RawMessage) Endpoint{
+	AddEndpointDriver("slack", func(options *json.RawMessage) Endpoint {
 		return newEndpointSlack(options)
 	})
 }
 
 type EndpointSlack struct {
-	Config EndpointSlackConfig
-	conn *irc.Conn
-	slack *slack.Client
+	Config   EndpointSlackConfig
+	conn     *irc.Conn
+	slack    *slack.Client
 	channels []*slack.Channel
-	users map[string]string
-	ims map[string]string
-	rtm *slack.RTM
-	msgid int
-	handler func(text string, source User, channel string, response MessageTarget)
+	users    map[string]string
+	ims      map[string]string
+	rtm      *slack.RTM
+	msgid    int
+	handler  func(text string, source User, channel string, response MessageTarget)
 }
 
 type SlackChannel struct {
@@ -36,13 +36,13 @@ type EndpointSlackConfig struct {
 }
 
 type UserSlack struct {
-	es *EndpointSlack
+	es   *EndpointSlack
 	nick string
-	id string
+	id   string
 }
 
 type MessageTargetSlack struct {
-	es   *EndpointSlack
+	es     *EndpointSlack
 	target string
 	public bool
 }
@@ -50,7 +50,7 @@ type MessageTargetSlack struct {
 func newEndpointSlack(options *json.RawMessage) *EndpointSlack {
 	e := &EndpointSlack{
 		users: make(map[string]string),
-		ims: make(map[string]string),
+		ims:   make(map[string]string),
 	}
 	json.Unmarshal(*options, &e.Config)
 	e.slack = slack.New(e.Config.Token)
@@ -62,12 +62,12 @@ func (es *EndpointSlack) Run() {
 		schannel, _ := es.slack.JoinChannel(channel)
 		es.channels = append(es.channels, schannel)
 	}
-	
+
 	ims, _ := es.slack.GetIMChannels()
 	for _, im := range ims {
 		es.ims[im.User] = im.ID
 	}
-	
+
 	es.rtm = es.slack.NewRTM()
 	go es.rtm.ManageConnection()
 	go func() {
@@ -82,8 +82,8 @@ func (es *EndpointSlack) Run() {
 					es.users[ev.User] = username
 				}
 				u := &UserSlack{
-					es: es,
-					id: ev.User,
+					es:   es,
+					id:   ev.User,
 					nick: username,
 				}
 				public := true
@@ -91,28 +91,26 @@ func (es *EndpointSlack) Run() {
 					public = false
 				}
 				mt := &MessageTargetSlack{
-					es: es,
+					es:     es,
 					target: ev.Channel,
 					public: public,
 				}
 				es.handler(ev.Text, u, ev.Channel, mt)
-				
+
 			}
-			
-			
-			
+
 		}
 	}()
 }
 
 func (es *EndpointSlack) GetUser(nick string) User {
 	users, _ := es.slack.GetUsers()
-	
+
 	for _, user := range users {
 		if user.Name == nick {
 			return &UserSlack{
-				es: es,
-				id: user.ID,
+				es:   es,
+				id:   user.ID,
 				nick: nick,
 			}
 		}
@@ -124,7 +122,7 @@ func (es *EndpointSlack) GetChannel(channel string) MessageTarget {
 	for _, schannel := range es.channels {
 		if schannel.Name == channel {
 			return &MessageTargetSlack{
-				es: es,
+				es:     es,
 				target: schannel.ID,
 				public: true,
 			}
@@ -156,7 +154,7 @@ func (u *UserSlack) SendMessage(format string, args ...interface{}) {
 func (u *UserSlack) HasRights() bool {
 	return true
 }
-	
+
 func (u *UserSlack) IsPublic() bool {
 	return false
 }

@@ -1,19 +1,19 @@
 package main
 
 import (
-	"math"
-	"strconv"
-	"time"
-	"os"
-	"regexp"
-	"fmt"
-	"os/exec"
-	"strings"
-	"log"
-	"io/ioutil"
-	"flag"
 	"encoding/json"
-	
+	"flag"
+	"fmt"
+	"io/ioutil"
+	"log"
+	"math"
+	"os"
+	"os/exec"
+	"regexp"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/hpcloud/tail"
 	"github.com/joliv/spark"
 )
@@ -23,39 +23,39 @@ var (
 )
 
 type ConfigData struct {
-	Name     string
+	Name      string
 	Endpoints []*EndpointConfig
-	Groups   []string
-	Commands map[string]*Command
-	Logs map[string]*Log
-	Monitors map[string]*MonitorConfig
+	Groups    []string
+	Commands  map[string]*Command
+	Logs      map[string]*Log
+	Monitors  map[string]*MonitorConfig
 }
 
 type EndpointConfig struct {
-	Driver string
+	Driver  string
 	Options *json.RawMessage
-	e Endpoint
+	e       Endpoint
 }
 
 type Command struct {
 	Command string
-	Output bool
+	Output  bool
 }
 
 type Log struct {
-	File string
+	File  string
 	Regex string
-//	Live bool
+	//	Live bool
 	Keep int
-//	Channels []string
+	//	Channels []string
 	lines []*tail.Line
 }
 
 type MonitorConfig struct {
-	Driver string
+	Driver  string
 	Options *json.RawMessage
 	monitor Monitor
-	track *MonitorTrack
+	track   *MonitorTrack
 }
 
 var Config ConfigData
@@ -63,24 +63,24 @@ var Config ConfigData
 func main() {
 	ConfigBytes, err := ioutil.ReadFile(*ConfigFile)
 	if err != nil {
-		log.Fatalf("Error reading config file %s\n", err)		
+		log.Fatalf("Error reading config file %s\n", err)
 	}
 	err = json.Unmarshal(ConfigBytes, &Config)
 	if err != nil {
-		log.Fatalf("Error parsing config file %s\n", err)		
+		log.Fatalf("Error parsing config file %s\n", err)
 	}
-	
+
 	for _, endpointConfig := range Config.Endpoints {
 		log.Printf("Starting up %s handler", endpointConfig.Driver)
 		endpointConfig.e = endpointDrivers[endpointConfig.Driver](endpointConfig.Options)
 		endpointConfig.e.HandleMessage(Message)
 		endpointConfig.e.Run()
 	}
-	
+
 	for name, logConfig := range Config.Logs {
-		go func(name string, logConfig *Log){
+		go func(name string, logConfig *Log) {
 			logfile, err := tail.TailFile(logConfig.File, tail.Config{Location: &tail.SeekInfo{Whence: os.SEEK_END}, Follow: true, ReOpen: true})
-			
+
 			if err != nil {
 				log.Printf("Error tailing file: %s", err)
 			}
@@ -96,10 +96,10 @@ func main() {
 				if line.Err != nil {
 					log.Printf("Error tailing file: %s", line.Err)
 				}
-			    if filter == nil || filter.MatchString(line.Text) {
+				if filter == nil || filter.MatchString(line.Text) {
 					logConfig.lines = append(logConfig.lines, line)
 					if len(logConfig.lines) > logConfig.Keep {
-						logConfig.lines = logConfig.lines[len(logConfig.lines) - logConfig.Keep:]
+						logConfig.lines = logConfig.lines[len(logConfig.lines)-logConfig.Keep:]
 					}
 					/*if logConfig.Live {
 						for _, channel := range logConfig.Channels {
@@ -108,7 +108,7 @@ func main() {
 					}*/
 				}
 			}
-			
+
 		}(name, logConfig)
 	}
 	for _, monitorConfig := range Config.Monitors {
@@ -214,17 +214,17 @@ func Message(text string, source User, channel string, response MessageTarget) {
 						}
 						variables = newvars
 					}
-					
+
 					if len(variables) > 10 {
 						if len(data) > 4 {
 							source.SendMessage("There are over %d variables in monitor %s matching %s, filter using `monitor %s variables <regex>`", len(variables), data[2], data[4], data[2])
-						} else {	
+						} else {
 							source.SendMessage("There are over %d variables in monitor %s, filter using `monitor %s variables <regex>`", len(variables), data[2], data[2])
 						}
 					} else {
 						if len(data) > 4 {
 							source.SendMessage("List of %d variables in monitor %s matching %s", len(variables), data[2], data[4])
-						} else {	
+						} else {
 							source.SendMessage("List of %d variables in monitor %s", len(variables), data[2])
 						}
 						for _, name := range variables {
@@ -297,7 +297,7 @@ func Message(text string, source User, channel string, response MessageTarget) {
 					high := -math.MaxFloat64
 					low := math.MaxFloat64
 					for i, val := range vt.Data {
-						switch tt := val.(type){
+						switch tt := val.(type) {
 						case float64:
 							values[i] = tt
 						case float32:
@@ -324,7 +324,7 @@ func Message(text string, source User, channel string, response MessageTarget) {
 				default:
 					response.SendMessage("Monitor command `%s` not recognized", data[3])
 				}
-				
+
 			}
 		}
 	}

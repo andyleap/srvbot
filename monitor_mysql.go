@@ -1,17 +1,17 @@
 package main
 
 import (
-	"strconv"
-	"log"
-	"strings"
-	"encoding/json"
 	"database/sql"
-	
+	"encoding/json"
+	"log"
+	"strconv"
+	"strings"
+
 	_ "github.com/go-sql-driver/mysql"
 )
 
 func init() {
-	AddMonitorDriver("mysql", func(options *json.RawMessage) Monitor{
+	AddMonitorDriver("mysql", func(options *json.RawMessage) Monitor {
 		m := &MysqlMonitor{}
 		json.Unmarshal(*options, &m)
 		m.Start()
@@ -21,7 +21,7 @@ func init() {
 
 type MysqlMonitor struct {
 	Connection string
-	db *sql.DB
+	db         *sql.DB
 }
 
 func (m *MysqlMonitor) Start() {
@@ -61,7 +61,7 @@ func (m *MysqlMonitor) GetValues(names []string) (values map[string]interface{})
 	for _, name := range names {
 		args = append(args, name)
 	}
-	data, err := m.db.Query("SHOW STATUS WHERE `Variable_name` IN (?" + strings.Repeat(",?", len(names)-1) + ")", args...)
+	data, err := m.db.Query("SHOW STATUS WHERE `Variable_name` IN (?"+strings.Repeat(",?", len(names)-1)+")", args...)
 	defer data.Close()
 	if err != nil {
 		log.Printf("Error getting monitor values: %s", err)

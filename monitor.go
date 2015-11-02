@@ -1,8 +1,8 @@
 package main
 
 import (
-	"time"
 	"encoding/json"
+	"time"
 )
 
 type Monitor interface {
@@ -10,7 +10,7 @@ type Monitor interface {
 	GetValues([]string) map[string]interface{}
 }
 
-var monitorDrivers = make(map[string] func(*json.RawMessage) Monitor)
+var monitorDrivers = make(map[string]func(*json.RawMessage) Monitor)
 
 func AddMonitorDriver(monitor string, constructor func(*json.RawMessage) Monitor) {
 	monitorDrivers[monitor] = constructor
@@ -18,8 +18,8 @@ func AddMonitorDriver(monitor string, constructor func(*json.RawMessage) Monitor
 
 type MonitorTrack struct {
 	Variables map[string]*MonitorTrackVariable
-	Interval int
-	timer *time.Timer
+	Interval  int
+	timer     *time.Timer
 }
 
 func newMonitorTrack() *MonitorTrack {
@@ -30,7 +30,7 @@ func newMonitorTrack() *MonitorTrack {
 
 type MonitorTrackVariable struct {
 	History int
-	Data []interface{}
+	Data    []interface{}
 }
 
 func (mt *MonitorTrack) SetTrack(variable string, history int) {
@@ -61,7 +61,7 @@ func (mt *MonitorTrack) Start(monitor Monitor) {
 			for variable, vt := range mt.Variables {
 				vt.Data = append(vt.Data, values[variable])
 				if len(vt.Data) > vt.History {
-					vt.Data = vt.Data[len(vt.Data) - vt.History:]
+					vt.Data = vt.Data[len(vt.Data)-vt.History:]
 				}
 			}
 		}

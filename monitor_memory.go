@@ -1,15 +1,15 @@
 package main
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"log"
 	"strconv"
 	"strings"
-	"io/ioutil"
-	"encoding/json"
 )
 
 func init() {
-	AddMonitorDriver("memory", func(options *json.RawMessage) Monitor{
+	AddMonitorDriver("memory", func(options *json.RawMessage) Monitor {
 		m := &MemoryMonitor{}
 		json.Unmarshal(*options, &m)
 		if m.File == "" {
@@ -25,7 +25,7 @@ type MemoryMonitor struct {
 }
 
 func (m *MemoryMonitor) Start() {
-	
+
 }
 
 func (m *MemoryMonitor) GetVariables() []string {
