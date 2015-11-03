@@ -128,7 +128,7 @@ func (vf ComputeVariableFactor) GetVars() []*ComputeVariableFactor {
 }
 
 var (
-	computeGrammer *Grammer
+	computeGrammar *Grammar
 )
 
 func init() {
@@ -155,7 +155,7 @@ func init() {
 		}, nil
 	})
 
-	expr := &Grammer{}
+	expr := &Grammar{}
 
 	parenexpr := And(Lit("("), Tag("Expr", expr), Lit(")"))
 	parenexpr.Node(func(m Match) (Match, error) {
@@ -204,11 +204,11 @@ func init() {
 		}, nil
 	})
 
-	computeGrammer = expr
+	computeGrammar = expr
 }
 
 func Decode(expr string) (Compute, error) {
-	comp, err := computeGrammer.ParseString(expr)
+	comp, err := computeGrammar.ParseString(expr)
 	if err != nil {
 		return nil, err
 	}
